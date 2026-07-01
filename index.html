@@ -71,43 +71,36 @@
             max-width: 200px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        #grid-container {
+        #word-lines-container {
             flex: 1;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            gap: 15px;
             width: 100%;
             max-width: 400px;
-            padding: 10px;
+            padding: 20px;
         }
-        #crossword {
-            display: grid;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.15);
-            padding: 12px;
-            border-radius: 10px;
+        .word-line {
+            display: flex;
+            gap: 8px;
         }
-        .cell {
-            width: 42px;
-            height: 42px;
-            background: transparent;
-            border-radius: 6px;
+        .letter-box {
+            width: 35px;
+            height: 35px;
+            border-bottom: 3px solid rgba(255, 255, 255, 0.4);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
-            color: #333;
-            transition: all 0.3s ease;
+            color: transparent;
+            transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
         }
-        .cell.active {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .cell.solved {
-            background: #ffeb3b;
-            color: #333;
-            border: none;
+        .letter-box.solved {
+            color: #ffeb3b;
+            border-bottom-color: #ffeb3b;
             animation: pop 0.3s ease;
         }
         #wheel-container {
@@ -174,9 +167,7 @@
         <div id="current-word"></div>
     </header>
 
-    <div id="grid-container">
-        <div id="crossword"></div>
-    </div>
+    <div id="word-lines-container"></div>
 
     <div id="wheel-container">
         <canvas id="canvas"></canvas>
@@ -186,117 +177,16 @@
     <script>
         // --- 10 DYNAMIC LEVELS DATABASE ---
         const gameLevels = [
-            {
-                levelNum: 1,
-                letters: ['C', 'A', 'T', 'O'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "COAT", cells: [{r:1, c:0}, {r:2, c:0}, {r:3, c:0}, {r:4, c:0}] },
-                    { word: "TACO", cells: [{r:4, c:0}, {r:4, c:1}, {r:4, c:2}, {r:4, c:3}] },
-                    { word: "CAT",  cells: [{r:4, c:2}, {r:3, c:2}, {r:2, c:2}] },
-                    { word: "ACT",  cells: [{r:2, c:2}, {r:2, c:3}, {r:2, c:4}] }
-                ]
-            },
-            {
-                levelNum: 2,
-                letters: ['E', 'A', 'R', 'T'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "TEAR", cells: [{r:0, c:1}, {r:1, c:1}, {r:2, c:1}, {r:3, c:1}] },
-                    { word: "RATE", cells: [{r:2, c:0}, {r:2, c:1}, {r:2, c:2}, {r:2, c:3}] },
-                    { word: "ART",  cells: [{r:2, c:3}, {r:3, c:3}, {r:4, c:3}] },
-                    { word: "EAR",  cells: [{r:0, c:1}, {r:0, c:2}, {r:0, c:3}] }
-                ]
-            },
-            {
-                levelNum: 3,
-                letters: ['L', 'I', 'V', 'E'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "LIVE", cells: [{r:1, c:1}, {r:1, c:2}, {r:1, c:3}, {r:1, c:4}] },
-                    { word: "EVIL", cells: [{r:0, c:3}, {r:1, c:3}, {r:2, c:3}, {r:3, c:3}] },
-                    { word: "VEIL", cells: [{r:3, c:0}, {r:3, c:1}, {r:3, c:2}, {r:3, c:3}] },
-                    { word: "LIE",  cells: [{r:1, c:1}, {r:2, c:1}, {r:3, c:1}] }
-                ]
-            },
-            {
-                levelNum: 4,
-                letters: ['S', 'T', 'O', 'P'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "STOP", cells: [{r:0, c:2}, {r:1, c:2}, {r:2, c:2}, {r:3, c:2}] },
-                    { word: "POST", cells: [{r:2, c:0}, {r:2, c:1}, {r:2, c:2}, {r:2, c:3}] },
-                    { word: "POTS", cells: [{r:0, c:4}, {r:1, c:4}, {r:2, c:4}, {r:3, c:4}] },
-                    { word: "TOP",  cells: [{r:2, c:1}, {r:3, c:1}, {r:4, c:1}] }
-                ]
-            },
-            {
-                levelNum: 5,
-                letters: ['C', 'A', 'M', 'P'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "CAMP", cells: [{r:1, c:0}, {r:1, c:1}, {r:1, c:2}, {r:1, c:3}] },
-                    { word: "MAP",  cells: [{r:1, c:2}, {r:2, c:2}, {r:3, c:2}] },
-                    { word: "CAP",  cells: [{r:1, c:0}, {r:2, c:0}, {r:3, c:0}] },
-                    { word: "AMP",  cells: [{r:3, c:0}, {r:3, c:1}, {r:3, c:2}] }
-                ]
-            },
-            {
-                levelNum: 6,
-                letters: ['B', 'A', 'K', 'E'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "BAKE", cells: [{r:0, c:1}, {r:1, c:1}, {r:2, c:1}, {r:3, c:1}] },
-                    { word: "BEAK", cells: [{r:0, c:1}, {r:0, c:2}, {r:0, c:3}, {r:0, c:4}] },
-                    { word: "BARK", cells: [{r:0, c:4}, {r:1, c:4}, {r:2, c:4}, {r:3, c:4}] },
-                    { word: "CAB",  cells: [{r:2, c:0}, {r:2, c:1}, {r:2, c:2}] } 
-                ]
-            },
-            {
-                levelNum: 7,
-                letters: ['L', 'A', 'M', 'P'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "LAMP", cells: [{r:0, c:2}, {r:1, c:2}, {r:2, c:2}, {r:3, c:2}] },
-                    { word: "PALM", cells: [{r:2, c:0}, {r:2, c:1}, {r:2, c:2}, {r:2, c:3}] },
-                    { word: "MAP",  cells: [{r:2, c:3}, {r:3, c:3}, {r:4, c:3}] },
-                    { word: "LAP",  cells: [{r:0, c:2}, {r:0, c:3}, {r:0, c:4}] }
-                ]
-            },
-            {
-                levelNum: 8,
-                letters: ['N', 'O', 'T', 'E'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "NOTE", cells: [{r:1, c:1}, {r:1, c:2}, {r:1, c:3}, {r:1, c:4}] },
-                    { word: "TONE", cells: [{r:0, c:3}, {r:1, c:3}, {r:2, c:3}, {r:3, c:3}] },
-                    { word: "NET",  cells: [{r:1, c:1}, {r:2, c:1}, {r:3, c:1}] },
-                    { word: "TEN",  cells: [{r:3, c:1}, {r:3, c:2}, {r:3, c:3}] }
-                ]
-            },
-            {
-                levelNum: 9,
-                letters: ['F', 'L', 'O', 'W'],
-                gridSize: 5,
-                boardWords: [
-                    { word: "FLOW", cells: [{r:0, c:1}, {r:1, c:1}, {r:2, c:1}, {r:3, c:1}] },
-                    { word: "WOLF", cells: [{r:2, c:0}, {r:2, c:1}, {r:2, c:2}, {r:2, c:3}] },
-                    { word: "FOWL", cells: [{r:0, c:1}, {r:0, c:2}, {r:0, c:3}, {r:0, c:4}] },
-                    { word: "LOW",  cells: [{r:2, c:3}, {r:3, c:3}, {r:4, c:3}] }
-                ]
-            },
-            {
-                levelNum: 10,
-                letters: ['D', 'E', 'A', 'R'],
-                gridSize: 6,
-                boardWords: [
-                    { word: "DEAR", cells: [{r:1, c:1}, {r:1, c:2}, {r:1, c:3}, {r:1, c:4}] },
-                    { word: "READ", cells: [{r:0, c:4}, {r:1, c:4}, {r:2, c:4}, {r:3, c:4}] },
-                    { word: "DARE", cells: [{r:1, c:1}, {r:2, c:1}, {r:3, c:1}, {r:4, c:1}] },
-                    { word: "RED",  cells: [{r:3, c:1}, {r:3, c:2}, {r:3, c:3}] },
-                    { word: "EAR",  cells: [{r:1, c:2}, {r:2, c:2}, {r:3, c:2}] }
-                ]
-            }
+            { levelNum: 1, letters: ['C', 'A', 'T', 'O'], targetWords: ["CAT", "ACT", "COAT", "TACO"] },
+            { levelNum: 2, letters: ['E', 'A', 'R', 'T'], targetWords: ["ART", "EAR", "RATE", "TEAR"] },
+            { levelNum: 3, letters: ['L', 'I', 'V', 'E'], targetWords: ["LIE", "VEIL", "EVIL", "LIVE"] },
+            { levelNum: 4, letters: ['S', 'T', 'O', 'P'], targetWords: ["TOP", "STOP", "POST", "POTS"] },
+            { levelNum: 5, letters: ['C', 'A', 'M', 'P'], targetWords: ["AMP", "CAP", "MAP", "CAMP"] },
+            { levelNum: 6, letters: ['B', 'A', 'K', 'E'], targetWords: ["BAKE", "BEAK", "BARK", "CAB"] },
+            { levelNum: 7, letters: ['L', 'A', 'M', 'P'], targetWords: ["LAP", "MAP", "LAMP", "PALM"] },
+            { levelNum: 8, letters: ['N', 'O', 'T', 'E'], targetWords: ["NET", "TEN", "NOTE", "TONE"] },
+            { levelNum: 9, letters: ['F', 'L', 'O', 'W'], targetWords: ["LOW", "FLOW", "WOLF", "FOWL"] },
+            { levelNum: 10, letters: ['D', 'E', 'A', 'R'], targetWords: ["RED", "EAR", "DARE", "DEAR", "READ"] }
         ];
 
         // --- TRACKING PROGRESSION ---
@@ -312,11 +202,10 @@
         let selectedNodes = [];
         let isDrawing = false;
         let currentTouchPos = { x: 0, y: 0 };
-        let gridCells = {};
         const nodes = [];
 
         // --- DOM ELEMENTS ---
-        const crossword = document.getElementById('crossword');
+        const linesContainer = document.getElementById('word-lines-container');
         const wheel = document.getElementById('wheel');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
@@ -327,32 +216,27 @@
         function initLevel() {
             currentLevel = gameLevels[currentLevelIndex];
             solvedWords = [];
-            gridCells = {};
             
             levelIndicator.innerText = `Level ${currentLevel.levelNum}`;
             currentWordDisplay.innerText = "";
-            
-            crossword.innerHTML = '';
-            crossword.style.gridTemplateColumns = `repeat(${currentLevel.gridSize}, 42px)`;
-            crossword.style.gridTemplateRows = `repeat(${currentLevel.gridSize}, 42px)`;
+            linesContainer.innerHTML = '';
 
-            for (let r = 0; r < currentLevel.gridSize; r++) {
-                for (let c = 0; c < currentLevel.gridSize; c++) {
-                    const cell = document.createElement('div');
-                    cell.classList.add('cell');
-                    crossword.appendChild(cell);
-                    gridCells[`${r},${c}`] = cell;
+            // Generate word layout rows
+            currentLevel.targetWords.forEach((word) => {
+                const lineElement = document.createElement('div');
+                lineElement.classList.add('word-line');
+                lineElement.dataset.word = word;
+
+                for (let i = 0; i < word.length; i++) {
+                    const letterBox = document.createElement('div');
+                    letterBox.classList.add('letter-box');
+                    letterBox.innerText = word[i];
+                    lineElement.appendChild(letterBox);
                 }
-            }
-
-            currentLevel.boardWords.forEach(w => {
-                w.cells.forEach(coord => {
-                    if(gridCells[`${coord.r},${coord.c}`]) {
-                        gridCells[`${coord.r},${coord.c}`].classList.add('active');
-                    }
-                });
+                linesContainer.appendChild(lineElement);
             });
 
+            // Build Wheel Structure
             wheel.innerHTML = '';
             nodes.length = 0; 
             const centerX = 110;
@@ -383,7 +267,7 @@
         }
         window.addEventListener('resize', resizeCanvas);
 
-        // --- INPUT ROUTING (TOUCH & MOUSE COMPATIBILITY) ---
+        // --- INPUT ROUTING ---
         wheel.addEventListener('touchstart', (e) => {
             e.preventDefault();
             handleStart(e.touches[0].clientX, e.touches[0].clientY);
@@ -483,21 +367,24 @@
         }
 
         function checkWordSubmit(word) {
-            const match = currentLevel.boardWords.find(w => w.word === word);
+            const hasMatch = currentLevel.targetWords.includes(word);
             
-            if (match && !solvedWords.includes(word)) {
+            if (hasMatch && !solvedWords.includes(word)) {
                 solvedWords.push(word);
-                match.cells.forEach((coord, index) => {
-                    setTimeout(() => {
-                        const cell = gridCells[`${coord.r},${coord.c}`];
-                        if(cell) {
-                            cell.innerText = word[index];
-                            cell.classList.add('solved');
-                        }
-                    }, index * 80);
-                });
+                
+                // Find matching row and reveal letters
+                const matchingLine = linesContainer.querySelector(`[data-word="${word}"]`);
+                if (matchingLine) {
+                    const boxes = matchingLine.querySelectorAll('.letter-box');
+                    boxes.forEach((box, index) => {
+                        setTimeout(() => {
+                            box.classList.add('solved');
+                        }, index * 80);
+                    });
+                }
 
-                if (solvedWords.length === currentLevel.boardWords.length) {
+                // Check level conditions
+                if (solvedWords.length === currentLevel.targetWords.length) {
                     setTimeout(() => {
                         if (currentLevelIndex < gameLevels.length - 1) {
                             alert("Level Complete! 🎉 Proceeding to next round.");
