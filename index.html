@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>ConnectTheWord By Datorg</title>
+
+    <meta property="og:title" content="ConnectTheWord By Datorg" />
+    <meta property="og:description" content="Can you solve all 10 word connection levels? Play now!" />
+    <meta property="og:image" content="https://chatgpt.com/backend-api/estuary/content?id=file_000000001f2071f88d23ae6c8959761b&ts=495241&p=fs&cid=1&sig=bc31c6bbb6320bdbdd158164a6c91e2af80e34c0d45dbadc6fa528156b716f0d&v=0" />
+    <meta property="og:type" content="website" />
+
     <style>
         * {
             box-sizing: border-box;
@@ -242,7 +248,7 @@
                 boardWords: [
                     { word: "BAKE", cells: [{r:0, c:1}, {r:1, c:1}, {r:2, c:1}, {r:3, c:1}] },
                     { word: "BEAK", cells: [{r:0, c:1}, {r:0, c:2}, {r:0, c:3}, {r:0, c:4}] },
-                    { word: "BARK", cells: [{r:0, c:4}, {r:1, c:4}, {r:2, c:4}, {r:3, c:4}] }, // Substituted for simplicity
+                    { word: "BARK", cells: [{r:0, c:4}, {r:1, c:4}, {r:2, c:4}, {r:3, c:4}] },
                     { word: "CAB",  cells: [{r:2, c:0}, {r:2, c:1}, {r:2, c:2}] } 
                 ]
             },
@@ -296,7 +302,6 @@
         // --- TRACKING PROGRESSION ---
         let currentLevelIndex = 0;
         
-        // Load saved session progress if available
         const savedLevel = localStorage.getItem('datorg_connect_word_level');
         if (savedLevel && parseInt(savedLevel) <= gameLevels.length) {
             currentLevelIndex = parseInt(savedLevel) - 1;
@@ -308,6 +313,7 @@
         let isDrawing = false;
         let currentTouchPos = { x: 0, y: 0 };
         let gridCells = {};
+        const nodes = [];
 
         // --- DOM ELEMENTS ---
         const crossword = document.getElementById('crossword');
@@ -323,11 +329,9 @@
             solvedWords = [];
             gridCells = {};
             
-            // Render Header Status
             levelIndicator.innerText = `Level ${currentLevel.levelNum}`;
             currentWordDisplay.innerText = "";
             
-            // Build Grid Framework
             crossword.innerHTML = '';
             crossword.style.gridTemplateColumns = `repeat(${currentLevel.gridSize}, 42px)`;
             crossword.style.gridTemplateRows = `repeat(${currentLevel.gridSize}, 42px)`;
@@ -341,7 +345,6 @@
                 }
             }
 
-            // Bind crossword structural paths
             currentLevel.boardWords.forEach(w => {
                 w.cells.forEach(coord => {
                     if(gridCells[`${coord.r},${coord.c}`]) {
@@ -350,9 +353,8 @@
                 });
             });
 
-            // Build Wheel Structure
             wheel.innerHTML = '';
-            nodes.length = 0; // Clear tracked coordinate instances
+            nodes.length = 0; 
             const centerX = 110;
             const centerY = 110;
             const radius = 75;
@@ -374,8 +376,6 @@
 
             resizeCanvas();
         }
-
-        const nodes = [];
 
         function resizeCanvas() {
             canvas.width = wheel.offsetWidth + 80;
@@ -497,7 +497,6 @@
                     }, index * 80);
                 });
 
-                // Check level win configurations
                 if (solvedWords.length === currentLevel.boardWords.length) {
                     setTimeout(() => {
                         if (currentLevelIndex < gameLevels.length - 1) {
@@ -516,7 +515,6 @@
             }
         }
 
-        // Run Setup on Startup
         initLevel();
     </script>
 </body>
